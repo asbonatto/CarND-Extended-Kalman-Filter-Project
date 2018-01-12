@@ -21,22 +21,52 @@ void KalmanFilter::Init(VectorXd &x_in, MatrixXd &P_in, MatrixXd &F_in,
 }
 
 void KalmanFilter::Predict() {
-  /**
-  TODO:
-    * predict the state
+  /* NOTE : 
+        Bu = 0, since we are not modeling directly the acceleration
   */
+  x_ = F_*x_;
+  // A posteriori error covariance 
+  MatrixXd F_transpose = F_.transpose(); 
+  // NOTE : could I avoid this declaration or would it modify the original F? RTFM
+  P_ = F_ * P_ * F_transpose + Q_;
 }
 
 void KalmanFilter::Update(const VectorXd &z) {
-  /**
-  TODO:
-    * update the state by using Kalman Filter equations
-  */
+  // Receives the measurement and updates the state
+  VectorXd y = z - H_ * x_;
+  AdjustPrediction(y);
 }
 
 void KalmanFilter::UpdateEKF(const VectorXd &z) {
-  /**
-  TODO:
-    * update the state by using Extended Kalman Filter equations
-  */
+  
+  // First step : to create the h'(x) function
+  double rho = sqrt(x_(0)*x_(0) + x_(1)*x_(1));
+  double theta = atan(x_(1)/x_(0));
+  double rho_d = (x_(0)*x_(2) + x_(1)*x_(3)) / rho;
+  
+  VectorXd h(3);
+  h << rho, theta, rho_dot;
+  
+  VectorXd y = z - h;
+  AdjustPrediction(y);
+  
+}
+
+void KalmanFilter::AdjustPrediction(const VectorXd &y) {
+  /* Generic method to update the state given the error
+     measurements to avoid duplication between 
+   Update and UpdateEKF
+  */ 
+  
+  int x_size = x_.size();
+  MatrixXd I = MatrixXd::Identity(x_size, x_size);
+  
+  MatrixXd H_t = H_.transpose();
+  MatrixXd S = H_ * P_ * H_t + R_;
+  MatrixXd S_i = S.inverse();
+  MatrixXd K =  P_ * H_t * Si;
+  
+  x_ = x_ + (K * y);
+  
+  P_ = (I - K * H_) * P_;
 }
