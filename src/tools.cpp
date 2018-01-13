@@ -32,7 +32,8 @@ VectorXd Tools::CalculateRMSE(const vector<VectorXd> &estimations,
   for (int i = 0; i < estimations.size(); i++){
       
       diff = estimations[i] - ground_truth[i];
-      rmse += diff.array()*diff.array();
+      diff = diff.array()*diff.array();
+      rmse += diff;
   }
   rmse = rmse/estimations.size();
   rmse = rmse.array().sqrt();
@@ -48,8 +49,8 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
   
   float eps = 1E-3;
   
-  float rho_sq = x_state[0] * x_state[0] + x_state[1] * x_state[1]
-  float rho = sqrt(rho_sq)
+  float rho_sq = x_state[0] * x_state[0] + x_state[1] * x_state[1];
+  float rho = sqrt(rho_sq);
   float rho_32 = rho*rho_sq;
   
   // Exception handling

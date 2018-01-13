@@ -45,7 +45,7 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   double rho_d = (x_(0)*x_(2) + x_(1)*x_(3)) / rho;
   
   VectorXd h(3);
-  h << rho, theta, rho_dot;
+  h << rho, theta, rho_d;
   
   VectorXd y = z - h;
   AdjustPrediction(y);
@@ -64,7 +64,7 @@ void KalmanFilter::AdjustPrediction(const VectorXd &y) {
   MatrixXd H_t = H_.transpose();
   MatrixXd S = H_ * P_ * H_t + R_;
   MatrixXd S_i = S.inverse();
-  MatrixXd K =  P_ * H_t * Si;
+  MatrixXd K =  P_ * H_t * S_i;
   
   x_ = x_ + (K * y);
   
