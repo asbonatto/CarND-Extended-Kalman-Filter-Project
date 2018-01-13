@@ -41,13 +41,26 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   
   // First step : to create the h'(x) function
   double rho = sqrt(x_(0)*x_(0) + x_(1)*x_(1));
-  double theta = atan(x_(1)/x_(0));
-  double rho_d = (x_(0)*x_(2) + x_(1)*x_(3)) / rho;
+  double phi = atan2(x_(1), x_(0));
+  double rho_d;
+  double eps = 1E-3;
+  
+  // Avoiding division by 0
+   if (fabs(rho) < eps){
+       rho_d = 0;
+       phi = 0;
+   }else{
+        rho_d= (x_(0)*x_(2) + x_(1)*x_(3)) / rho;
+    }    
   
   VectorXd h(3);
-  h << rho, theta, rho_d;
+  h << rho, phi, rho_d;
   
   VectorXd y = z - h;
+    // Normalization to ]-pi; pi[
+  while (y(1) < -M_PI) {y(1) += 2 * M_PI;}
+  while (y(1) > M_PI)  {y(1) -= 2 * M_PI;}
+  
   AdjustPrediction(y);
   
 }
