@@ -49,7 +49,7 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
   
   float eps = 1E-3;
   
-  MatrixXd Hj(3, 4);
+  MatrixXd Hj=MatrixXd::Constant(3, 4, 0);
  
   float px = x_state(0);
   float py = x_state(1);
@@ -63,6 +63,7 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
   // Exception handling
   if (fabs(rho_sq) < eps){
       std::cout << "ERROR: Division by zero at CalculateJacobian" << std::endl;
+
       return Hj;
   }
   

@@ -57,9 +57,19 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   h << rho, phi, rho_d;
   
   VectorXd y = z - h;
-    // Normalization to ]-pi; pi[
-  while (y(1) < -M_PI) {y(1) += 2 * M_PI;}
-  while (y(1) > M_PI)  {y(1) -= 2 * M_PI;}
+    // Normalization to [-pi; pi]
+  float cosy1 = cos(y(1));
+  float siny1 = sin(y(1));
+  
+  if (fabs(cosy1) < eps) {
+      if(siny1 > 0){
+           y(1) = M_PI/2;
+      }else{
+          y(1) = -M_PI/2;
+      }
+  }else{
+      y(1) = atan2(siny1, cosy1);
+  }
   
   AdjustPrediction(y);
   
